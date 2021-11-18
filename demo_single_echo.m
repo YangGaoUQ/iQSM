@@ -2,13 +2,13 @@
 %% Assume your raw phase data is in NIFTI format
 
 
-% (1) download or clone github repo for deepMRI: https://github.com/sunhongfu/deepMRI
+% (1) download or clone github repo for iQSM: https://github.com/YangGaoUQ/DCRNet
 % (2) download demo data and checkpoints here: https://www.dropbox.com/sh/9kmbytgf3jpj7bh/AACUZJ1KlJ1AFCPMIVyRFJi5a?dl=0
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Set your own data paths and parameters
-deepMRI_root = '~/Downloads/deepMRI'; % where deepMRI git repo is downloaded/cloned to
+iQSM_root    = '~/Downloads/iQSM'; % where iQSM git repo is downloaded/cloned to
 checkpoints  = '~/Downloads/iQSM_data/checkpoints';
 PhasePath    = '~/Downloads/iQSM_data/demo/ph_single_echo.nii';  % where raw phase data is (in NIFTI format)
 ReconDir     = '~/Downloads/iQSM_data/demo_recon';  %% where to save reconstruction output
@@ -25,8 +25,8 @@ MaskPath = '~/Downloads/iQSM_data/demo/mask_single_echo.nii'; %% brain mask; set
 
 
 %% add MATLAB paths
-addpath(genpath([deepMRI_root,'/iQSM/iQSM_fcns/']));  % add necessary utility function for saving data and echo-fitting;
-addpath(genpath([deepMRI_root,'/utils']));  %  add NIFTI saving and loading functions;
+addpath(genpath([iQSM_root,'/iQSM_fcns/']));  % add necessary utility function for saving data and echo-fitting;
+addpath(genpath([iQSM_root,'/utils']));  %  add NIFTI saving and loading functions;
 
 
 %% 1. read in data
@@ -72,11 +72,11 @@ mask_eroded = Save_Input(phase, mask, TE, B0, Eroded_voxel, ReconDir);
 
 switch NetworkType 
     case 0
-        InferencePath = [deepMRI_root, '/iQSM/PythonCodes/Evaluation/Inference.py']; 
+        InferencePath = [iQSM_root, '/PythonCodes/Evaluation/Inference.py']; 
     case 1
-        InferencePath = [deepMRI_root, '/iQSM/PythonCodes/Evaluation/DataFidelityVersion/Inference.py'];
+        InferencePath = [iQSM_root, '/PythonCodes/Evaluation/DataFidelityVersion/Inference.py'];
     case 2
-        InferencePath = [deepMRI_root, '/iQSM/PythonCodes/Evaluation/LearnableLapLayer/Inference.py'];
+        InferencePath = [iQSM_root, '/PythonCodes/Evaluation/LearnableLapLayer/Inference.py'];
 end 
 
 PythonRecon(InferencePath, [ReconDir,'/Network_Input.mat'], ReconDir, checkpoints);
