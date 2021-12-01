@@ -4,6 +4,8 @@
 
 * This code was built and tested on Centos 7.8 with Nvdia Tesla V100 and macos12.0.1/ubuntu 19.10 with GTX 1060.
 
+- It is recommended that the phase data of ultra-high resolution (higher than 0.7 mm) should be interpoloated into 1 mm for better reconstruction results.  
+
 # Content
 
 - [ Overview](#head1)
@@ -72,7 +74,7 @@ Fig. 2: Comparison of different QSM methods on three ICH patients. Susceptibilit
 1. Clone this repository.
 
 ```
-    git clone https://github.com/YangGaoUQ/iQSM.git
+    git clone https://github.com/sunhongfu/deepMRI.git
 ```
 
 2. Install prerequisites (on linux system);

@@ -2,13 +2,29 @@
 %% Assume your raw phase data is in NIFTI format
 
 
-% (1) download or clone github repo for iQSM: https://github.com/YangGaoUQ/DCRNet
+% (1) download or clone github repo for deepMRI: https://github.com/sunhongfu/deepMRI
 % (2) download demo data and checkpoints here: https://www.dropbox.com/sh/9kmbytgf3jpj7bh/AACUZJ1KlJ1AFCPMIVyRFJi5a?dl=0
 
+clear 
+clc
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% data preparation guide: 
+
+% 1. phase evolution type:
+% The relationship between the phase data and filed pertubation (delta_B) 
+% is assumed to satisfy the following equation: 
+% "phase = -delta_B * gamma * TE" 
+% Therefore, if your phase data is in the format of "phase = delta_B * gamma * TE;" 
+% it will have to be preprocessed by multiplication by -1; 
+
+% 2. For Ultra-high resolutin data:
+% it is recommended that the phase data of ultra-high resolution (higher
+% than 0.7 mm) should be interpoloated into 1 mm for better reconstruction results.  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Set your own data paths and parameters
-iQSM_root    = '~/Downloads/iQSM'; % where deepMRI git repo is downloaded/cloned to
+deepMRI_root = '~/Downloads/deepMRI'; % where deepMRI git repo is downloaded/cloned to
 checkpoints  = '~/Downloads/iQSM_data/checkpoints';
 PhasePath    = '~/Downloads/iQSM_data/demo/ph_multi_echo.nii';  % where raw phase data is (in NIFTI format)
 ReconDir     = '~/Downloads/iQSM_data/demo_recon/';  %% where to save reconstruction output
@@ -26,8 +42,8 @@ MagPath = '~/Downloads/iQSM_data/demo/mag_multi_echo.nii'; % magnitude image; se
 
 
 %% add MATLAB paths
-addpath(genpath([iQSM_root,'/iQSM_fcns/']));  % add necessary utility function for saving data and echo-fitting;
-addpath(genpath([iQSM_root,'/utils']));  %  add NIFTI saving and loading functions;
+addpath(genpath([deepMRI_root,'/iQSM/iQSM_fcns/']));  % add necessary utility function for saving data and echo-fitting;
+addpath(genpath([deepMRI_root,'/utils']));  %  add NIFTI saving and loading functions;
 
 
 %% 1. read in data
@@ -83,14 +99,17 @@ end
 [mask, pos] = ZeroPadding(mask, 16);
 
 %% set inference.py path; 
-switch NetworkType
+switch NetworkType 
     case 0
-        InferencePath = [iQSM_root, '/PythonCodes/Evaluation/Inference.py'];
+        InferencePath = [deepMRI_root, '/iQSM/PythonCodes/Evaluation/Inference.py']; 
+        checkpoints = [checkpoints, '/iQSM_and_iQFM'];
     case 1
-        InferencePath = [iQSM_root, '/PythonCodes/Evaluation/DataFidelityVersion/Inference.py'];
+        InferencePath = [deepMRI_root, '/iQSM/PythonCodes/Evaluation/DataFidelityVersion/Inference.py'];
+        checkpoints = [checkpoints, '/iQSM_iQFM_DataFidelity']; 
     case 2
-        InferencePath = [iQSM_root, '/PythonCodes/Evaluation/LearnableLapLayer/Inference.py'];
-end
+        InferencePath = [deepMRI_root, '/iQSM/PythonCodes/Evaluation/LearnableLapLayer/Inference.py'];
+        checkpoints = [checkpoints, '/iQSM_learnableKernels']; 
+end 
 
 for echo_num = 1 : imsize(4)
     
@@ -117,6 +136,18 @@ for echo_num = 1 : imsize(4)
     
     clear tmp_phase;
 end
+
+
+
+%% save results of all echoes before echo fitting
+nii = make_nii(chi, vox2);
+save_nii(nii, [ReconDir, 'iQSM_all_echoes.nii']);
+
+nii = make_nii(lfs, vox2);
+save_nii(nii, [ReconDir, 'iQFM_all_echoes.nii']);
+
+
+
 
 %% magnitude weighted echo-fitting and save as NIFTI
 
